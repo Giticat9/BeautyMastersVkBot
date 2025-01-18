@@ -23,7 +23,7 @@ export class VkGroupNewMessageHandlerService {
 				peer_id: event.object.message.peer_id,
 				random_id: 0,
 				keyboard: JSON.stringify(eventPayload.keyboard),
-				message: 'Приветствую! Пожалуйста, выберите что вас интересует',
+				message: eventPayload.message,
 			});
 
 			console.log(result);
