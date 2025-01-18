@@ -5,6 +5,8 @@ import {
 	VkGroupNewMessageHandlerService,
 } from '../../../application/services/vk/handlers/vk-group-new-message-handler.service';
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
+import { EventProcessingService } from '../../../domain/services/event-processing.service';
+import { EventNewMessagePayloadService } from '../../../domain/services/payloads/event-new-message-payload.service';
 
 @Module({
 	providers: [
@@ -14,6 +16,9 @@ import { DiscoveryService, MetadataScanner } from '@nestjs/core';
 		VkBotApiService,
 		VkBotLongPollingService,
 		VkGroupNewMessageHandlerService,
+
+		EventProcessingService,
+		EventNewMessagePayloadService
 	],
 })
 export class VkBotModule {

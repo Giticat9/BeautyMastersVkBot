@@ -25,9 +25,26 @@ export class VkBotApiService {
 				access_token: this.vkGroupAccessToken,
 				v: this.vkApiVersion,
 			},
-			transformResponse: (data) => JSON.parse(data)?.response
+			transformResponse: (data) => JSON.parse(data)?.response,
 		});
 
 		return response.data;
+	}
+
+	async executeApiPostMethod<T>(method: string, options: any): Promise<T> {
+		try {
+			const url = new URL(method, this.vkApiUrl).toString();
+			const response = await axios.post(url, null, {
+				params: {
+					access_token: this.vkGroupAccessToken,
+					v: this.vkApiVersion,
+					...options,
+				},
+			});
+
+			return response.data;
+		} catch (error) {
+			console.log(error);
+		}
 	}
 }

@@ -4,6 +4,7 @@ import { VkBotApiService } from './vk-bot-api.service';
 import axios from 'axios';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { EVENT_LISTENER } from './vk-bot-event.decorator';
+import { GetLongPollEventResponse } from '../../interfaces/vk/get-long-poll-event-response.interface';
 
 type VkBotEventCallback = (...args: any[]) => void;
 
@@ -27,6 +28,10 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 		this.listenForEvents(longPollServer).then(null);
 	}
 
+	onApplicationShutdown() {
+		this.eventListeners.clear();
+	}
+
 	public subscribe(event: string, callback: VkBotEventCallback) {
 		if (!this.eventListeners.has(event)) {
 			this.eventListeners.set(event, []);
@@ -46,8 +51,8 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 					if (event) {
 						const callback = instance[methodName];
 
-						this.logger.log(`Subscribing vk bot event listener: ${event}, ${methodName}`);
-						this.subscribe(event, callback);
+						this.logger.log(`Subscribing vk bot event listener. { event_name: ${event}, callback: ${methodName} }`);
+						this.subscribe(event, callback.bind(instance));
 					}
 				}
 			}
@@ -67,7 +72,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 
 		while (true) {
 			try {
-				const response = await axios.get(longPollServerUrl, {
+				const response = await axios.get<GetLongPollEventResponse>(longPollServerUrl, {
 					params: {
 						act: 'a_check',
 						key: this.longPollingKey,
@@ -79,7 +84,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 				for (const event of response.data?.updates) {
 					const callbacks = this.eventListeners.get(event.type) ?? [];
 					for (const callback of callbacks) {
-						callback(event.object);
+						callback(event);
 					}
 				}
 
@@ -89,9 +94,5 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 				await new Promise((resolve) => setTimeout(resolve, 5000));
 			}
 		}
-	}
-
-	onApplicationShutdown() {
-		this.eventListeners.clear();
 	}
 }
