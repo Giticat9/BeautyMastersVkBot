@@ -6,8 +6,6 @@ import {
 import { VkGroupChatActionButtonType } from '../enums/action-button-types.enum';
 import { EventProcessingReturnType } from '../interfaces/event-processing.interface';
 import { EventNewMessagePayloadService } from './payloads/event-new-message-payload.service';
-import { VkGroupChatTextButtonDto } from '../dto';
-import { VkGroupChatButtonTypeEnum } from '../enums/chat-button-type.enum';
 
 @Injectable()
 export class EventProcessingService {
@@ -25,34 +23,38 @@ export class EventProcessingService {
 
 		const startPageKeyboard = this.eventNewMessagePayloadService.getStartActionKeyboard();
 		const mastersListPageKeyboard = this.eventNewMessagePayloadService.getMastersListActionKeyboard();
+		const selectedManicureMasterInlineActionKeyboard = this.eventNewMessagePayloadService
+			.getSelectedMasterInlineActionKeyboard('79019086304');
+		const selectedDepilationMasterInlineActionKeyboard = this.eventNewMessagePayloadService
+			.getSelectedMasterInlineActionKeyboard('79019086304');
 		const priceListPageKeyboard = this.eventNewMessagePayloadService.getPriceListActionKeyboard();
 
 		const command = parsedPayload.command;
 		switch (command) {
 			case VkGroupChatActionButtonType.START: {
-				return { message: 'null', keyboard: startPageKeyboard };
+				return { message: 'Выберите что Вас интересует.', keyboard: startPageKeyboard };
 			}
 			case VkGroupChatActionButtonType.MASTERS_LIST: {
 				return {
-					message: 'Выберите мастера, про которого хотите узнать',
+					message: 'Выберите мастера, про которого хотите узнать.',
 					keyboard: mastersListPageKeyboard,
 				};
 			}
 			case VkGroupChatActionButtonType.MASTER_MANICURE_PEDICURE: {
 				return {
 					message: '+',
-					keyboard: this.eventNewMessagePayloadService.getSelectedMasterInlineActionKeyboard('79019086304')
-				}
+					keyboard: selectedManicureMasterInlineActionKeyboard
+				};
 			}
 			case VkGroupChatActionButtonType.MASTER_DEPILATION: {
 				return {
 					message: '+',
-					keyboard: this.eventNewMessagePayloadService.getSelectedMasterInlineActionKeyboard('79019086304')
-				}
+					keyboard: selectedDepilationMasterInlineActionKeyboard
+				};
 			}
 			case VkGroupChatActionButtonType.PRICE_LIST: {
 				return {
-					message: 'Выберите услуги, на которую хотите получить прайс-лист',
+					message: 'Выберите услуги, на которую хотите получить прайс-лист.',
 					keyboard: priceListPageKeyboard,
 				};
 			}
@@ -76,7 +78,7 @@ export class EventProcessingService {
 			}
 			case VkGroupChatActionButtonType.BACK_FROM_MASTERS_LIST:
 			case VkGroupChatActionButtonType.BACK_FROM_PRICE_LIST: {
-				return { message: 'null', keyboard: startPageKeyboard };
+				return { message: 'Выберите что Вас интересует.', keyboard: startPageKeyboard };
 			}
 			default:
 				throw new Error(`(${this.processNewMessageEvent.name}): command with type '${command}' is not implemented`);
