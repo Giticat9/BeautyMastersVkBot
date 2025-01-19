@@ -1,48 +1,34 @@
 import { SerializedName } from '../decorators/serialized-name.decorator';
+import {
+	VkGroupChatCallbackButtonDto,
+	VkGroupChatLocationButtonDto,
+	VkGroupChatOpenAppButtonDto,
+	VkGroupChatOpenLinkButtonDto,
+	VkGroupChatTextButtonDto,
+	VkGroupChatVkpayButtonDto,
+} from './buttons';
 
-export class VkGroupMessageButtonActionPayloadDto {
-	@SerializedName('command')
-	public command: string;
-
-	constructor(command: string) {
-		this.command = command;
-	}
-}
-
-export class VkGroupMessageButtonActionDto {
-	@SerializedName('type')
-	public type: string;
-	@SerializedName('label')
-	public label?: string;
-	@SerializedName('payload')
-	public payload?: VkGroupMessageButtonActionPayloadDto;
-
-	constructor(type: string,
-				label: string = null,
-				payload: VkGroupMessageButtonActionPayloadDto = null) {
-		this.type = type;
-		this.label = label;
-		this.payload = payload;
-	}
-}
-
-export class VkGroupMessageButtonDto {
-	@SerializedName('action')
-	public action: VkGroupMessageButtonActionDto;
-
-	constructor(action: VkGroupMessageButtonActionDto) {
-		this.action = action;
-	}
-}
+type VkGroupMessageButtonType =
+	| VkGroupChatTextButtonDto
+	| VkGroupChatLocationButtonDto
+	| VkGroupChatOpenLinkButtonDto
+	| VkGroupChatOpenAppButtonDto
+	| VkGroupChatVkpayButtonDto
+	| VkGroupChatCallbackButtonDto
 
 export class VkGroupMessageDto {
 	@SerializedName('one_time')
 	public oneTime: boolean = false;
-	@SerializedName('buttons')
-	public buttons: VkGroupMessageButtonDto[][] = [];
 
-	constructor(oneTime: boolean = false, buttons: VkGroupMessageButtonDto[][] = []) {
+	@SerializedName('inline')
+	public inline?: boolean = false;
+
+	@SerializedName('buttons')
+	public buttons: VkGroupMessageButtonType[][] = [];
+
+	constructor(oneTime: boolean = false, inline: boolean = false, buttons: VkGroupMessageButtonType[][] = []) {
 		this.oneTime = oneTime;
+		this.inline = inline;
 		this.buttons = buttons;
 	}
 }

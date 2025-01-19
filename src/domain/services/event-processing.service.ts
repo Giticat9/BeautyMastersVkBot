@@ -6,6 +6,8 @@ import {
 import { VkGroupChatActionButtonType } from '../enums/action-button-types.enum';
 import { EventProcessingReturnType } from '../interfaces/event-processing.interface';
 import { EventNewMessagePayloadService } from './payloads/event-new-message-payload.service';
+import { VkGroupChatTextButtonDto } from '../dto';
+import { VkGroupChatButtonTypeEnum } from '../enums/chat-button-type.enum';
 
 @Injectable()
 export class EventProcessingService {
@@ -21,11 +23,60 @@ export class EventProcessingService {
 		if (!('command' in parsedPayload))
 			throw new Error(`(${this.processNewMessageEvent.name}): command is undefined`);
 
+		const startPageKeyboard = this.eventNewMessagePayloadService.getStartActionKeyboard();
+		const mastersListPageKeyboard = this.eventNewMessagePayloadService.getMastersListActionKeyboard();
+		const priceListPageKeyboard = this.eventNewMessagePayloadService.getPriceListActionKeyboard();
+
 		const command = parsedPayload.command;
 		switch (command) {
 			case VkGroupChatActionButtonType.START: {
-				const keyboard = this.eventNewMessagePayloadService.getStartActionKeyboard();
-				return { message: null, keyboard };
+				return { message: 'null', keyboard: startPageKeyboard };
+			}
+			case VkGroupChatActionButtonType.MASTERS_LIST: {
+				return {
+					message: 'Выберите мастера, про которого хотите узнать',
+					keyboard: mastersListPageKeyboard,
+				};
+			}
+			case VkGroupChatActionButtonType.MASTER_MANICURE_PEDICURE: {
+				return {
+					message: '+',
+					keyboard: this.eventNewMessagePayloadService.getSelectedMasterInlineActionKeyboard('79019086304')
+				}
+			}
+			case VkGroupChatActionButtonType.MASTER_DEPILATION: {
+				return {
+					message: '+',
+					keyboard: this.eventNewMessagePayloadService.getSelectedMasterInlineActionKeyboard('79019086304')
+				}
+			}
+			case VkGroupChatActionButtonType.PRICE_LIST: {
+				return {
+					message: 'Выберите услуги, на которую хотите получить прайс-лист',
+					keyboard: priceListPageKeyboard,
+				};
+			}
+			case VkGroupChatActionButtonType.PRICE_LIST_MANICURE: {
+				return {
+					message: this.eventNewMessagePayloadService.getPriceListManicureActionMessage(),
+					attachment: 'photo-228884485_456239060',
+				};
+			}
+			case VkGroupChatActionButtonType.PRICE_LIST_PEDICURE: {
+				return {
+					message: this.eventNewMessagePayloadService.getPriceListPedicureActionMessage(),
+					attachment: 'photo-228884485_456239061',
+				};
+			}
+			case VkGroupChatActionButtonType.PRICE_LIST_DEPILATION: {
+				return {
+					message: this.eventNewMessagePayloadService.getPriceListDepilationActionMessage(),
+					attachment: 'photo-228884485_456239059',
+				};
+			}
+			case VkGroupChatActionButtonType.BACK_FROM_MASTERS_LIST:
+			case VkGroupChatActionButtonType.BACK_FROM_PRICE_LIST: {
+				return { message: 'null', keyboard: startPageKeyboard };
 			}
 			default:
 				throw new Error(`(${this.processNewMessageEvent.name}): command with type '${command}' is not implemented`);

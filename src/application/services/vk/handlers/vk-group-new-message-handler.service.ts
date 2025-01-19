@@ -18,13 +18,17 @@ export class VkGroupNewMessageHandlerService {
 	@VKBotEvent(VkGroupEvents.MESSAGE_NEW)
 	async handleVkGroupNewMessage(event: GetLongPollEventUpdate) {
 		try {
-			const eventPayload = this.eventProcessingService.processNewMessageEvent(event);
-			const result = await this.vkBotApiService.executeApiPostMethod('messages.send', {
+			const { message, keyboard, ...rest } = this.eventProcessingService.processNewMessageEvent(event);
+			const executeParams: Record<string, any> = {
 				peer_id: event.object.message.peer_id,
 				random_id: 0,
-				keyboard: JSON.stringify(eventPayload.keyboard),
-				message: eventPayload.message,
-			});
+			};
+
+			if (keyboard) executeParams['keyboard'] = JSON.stringify(keyboard);
+			if (message) executeParams['message'] = message;
+
+			const result = await this.vkBotApiService
+				.executeApiPostMethod('messages.send', Object.assign(executeParams, rest ?? {}));
 
 			console.log(result);
 		} catch (error) {
