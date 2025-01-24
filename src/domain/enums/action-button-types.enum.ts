@@ -14,5 +14,5 @@ export enum VkGroupChatActionButtonType {
 	BACK_FROM_PRICE_LIST = 'back_from_price_list',
 
 	LOCATION = 'location',
-	SIGN_PROCEDURE = 'sign_profile',
+	SIGN_PROCEDURE = 'sign_procedure',
 }

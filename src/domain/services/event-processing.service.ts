@@ -6,13 +6,24 @@ import {
 import { VkGroupChatActionButtonType } from '../enums/action-button-types.enum';
 import { EventProcessingReturnType } from '../interfaces/event-processing.interface';
 import { EventNewMessagePayloadService } from './payloads/event-new-message-payload.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EventProcessingService {
-	constructor(private readonly eventNewMessagePayloadService: EventNewMessagePayloadService) {
+	private readonly phoneManicureMaster: string = null;
+	private readonly phoneDepilationMaster: string = null;
+	private readonly linkSingUpManicure: string = null;
+	private readonly linkSingUpDepilation: string = null;
+
+	constructor(private readonly eventNewMessagePayloadService: EventNewMessagePayloadService,
+				private readonly configService: ConfigService) {
+		this.phoneManicureMaster = configService.get<string>('PHONE_MANICURE_MASTER') ?? '';
+		this.phoneDepilationMaster = configService.get<string>('PHONE_DEPILATION_MASTER') ?? '';
+		this.linkSingUpManicure = configService.get<string>('LINK_SING_UP_MANICURE') ?? '';
+		this.linkSingUpDepilation = configService.get<string>('LINK_SING_UP_DEPILATION') ?? '';
 	}
 
-	processNewMessageEvent(event: GetLongPollEventUpdate): EventProcessingReturnType {
+	processNewMessageEvent(event: GetLongPollEventUpdate): EventProcessingReturnType | EventProcessingReturnType[] {
 		const { payload } = event?.object?.message;
 		if (!payload)
 			throw new Error(`(${this.processNewMessageEvent.name}): payload are is missing`);
@@ -24,9 +35,9 @@ export class EventProcessingService {
 		const startPageKeyboard = this.eventNewMessagePayloadService.getStartActionKeyboard();
 		const mastersListPageKeyboard = this.eventNewMessagePayloadService.getMastersListActionKeyboard();
 		const selectedManicureMasterInlineActionKeyboard = this.eventNewMessagePayloadService
-			.getSelectedMasterInlineActionKeyboard('79019086304');
+			.getSelectedMasterInlineActionKeyboard(this.phoneManicureMaster);
 		const selectedDepilationMasterInlineActionKeyboard = this.eventNewMessagePayloadService
-			.getSelectedMasterInlineActionKeyboard('79019086304');
+			.getSelectedMasterInlineActionKeyboard(this.phoneDepilationMaster);
 		const priceListPageKeyboard = this.eventNewMessagePayloadService.getPriceListActionKeyboard();
 
 		const command = parsedPayload.command;
@@ -42,14 +53,16 @@ export class EventProcessingService {
 			}
 			case VkGroupChatActionButtonType.MASTER_MANICURE_PEDICURE: {
 				return {
-					message: '+',
-					keyboard: selectedManicureMasterInlineActionKeyboard
+					message: 'Федорова Алена\n' +
+						'Мастер маникюра, педикюра\n',
+					keyboard: selectedManicureMasterInlineActionKeyboard,
 				};
 			}
 			case VkGroupChatActionButtonType.MASTER_DEPILATION: {
 				return {
-					message: '+',
-					keyboard: selectedDepilationMasterInlineActionKeyboard
+					message: 'Журавлева Анна\n' +
+						'Мастер депиляции, SPA-шугаринга\n',
+					keyboard: selectedDepilationMasterInlineActionKeyboard,
 				};
 			}
 			case VkGroupChatActionButtonType.PRICE_LIST: {
@@ -61,19 +74,62 @@ export class EventProcessingService {
 			case VkGroupChatActionButtonType.PRICE_LIST_MANICURE: {
 				return {
 					message: this.eventNewMessagePayloadService.getPriceListManicureActionMessage(),
+					keyboard: this.eventNewMessagePayloadService.getPriceListInlineActionKeyboard(
+						this.linkSingUpManicure,
+						this.phoneManicureMaster,
+					),
 					attachment: 'photo-228884485_456239060',
 				};
 			}
 			case VkGroupChatActionButtonType.PRICE_LIST_PEDICURE: {
 				return {
 					message: this.eventNewMessagePayloadService.getPriceListPedicureActionMessage(),
+					keyboard: this.eventNewMessagePayloadService.getPriceListInlineActionKeyboard(
+						this.linkSingUpManicure,
+						this.phoneManicureMaster,
+					),
 					attachment: 'photo-228884485_456239061',
 				};
 			}
 			case VkGroupChatActionButtonType.PRICE_LIST_DEPILATION: {
 				return {
 					message: this.eventNewMessagePayloadService.getPriceListDepilationActionMessage(),
+					keyboard: this.eventNewMessagePayloadService.getPriceListInlineActionKeyboard(
+						this.linkSingUpDepilation,
+						this.phoneDepilationMaster,
+					),
 					attachment: 'photo-228884485_456239059',
+				};
+			}
+			case VkGroupChatActionButtonType.SIGN_PROCEDURE: {
+				return [
+					{
+						message: '🔹Для записи, выберите интересующую Вас услугу и нажмите "Записаться" после чего откроется прямая ссылка на страницу.\n' +
+							'🔹Если же необходимы уточнения по поводу процедур, нажмите на подходящий для Вас вид связи (WhatsApp, Telegram, Позвонить)\n\n' +
+							'📣 Хотим отметить, если мастер не смог ответить сразу, не переживайте! Скорее всего сейчас он занят и обязательно свяжется с Вами в ближайшее время 😊',
+					},
+					{
+						message: 'Запись на процедуры маникюра/педикюра.\n' +
+							'Мастер: Федорова Алена\n',
+						keyboard: this.eventNewMessagePayloadService.getPriceListInlineActionKeyboard(
+							this.linkSingUpManicure,
+							this.phoneManicureMaster,
+						),
+					},
+					{
+						message: 'Запись на процедуры депиляции/SPA-шугаринга\n' +
+							'Мастер: Журавлева Анна\n',
+						keyboard: this.eventNewMessagePayloadService.getPriceListInlineActionKeyboard(
+							this.linkSingUpDepilation,
+							this.phoneDepilationMaster,
+						),
+					},
+				];
+			}
+			case VkGroupChatActionButtonType.ABOUT_US: {
+				return {
+					message: this.eventNewMessagePayloadService.getAboutUsActionMessage(),
+					attachment: 'photo-228884485_456239024',
 				};
 			}
 			case VkGroupChatActionButtonType.BACK_FROM_MASTERS_LIST:
