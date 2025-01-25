@@ -1,9 +1,12 @@
 name: Deploy To Server
 run-name: ${{github.actor}} is running deploy
-on: [push]
+on:
+  push:
+    branches: ["master"]
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -15,4 +18,5 @@ jobs:
           echo VK_API_URL=${{ vars.VK_API_URL }} > .env
           echo VK_API_VERSION=${{ vars.VK_API_VERSION }} > .env
           echo ${{ vars }}
+          echo ${{ secrets }}
         
