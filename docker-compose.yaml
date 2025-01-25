@@ -1,4 +1,3 @@
-version: '2'
 services:
   vk_bot_app:
     restart: 'always'
