@@ -1,0 +1,19 @@
+version: '2'
+services:
+  vk_bot_app:
+    restart: 'always'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    networks:
+      - network-vk-bot
+      - network-pooling
+networks:
+  network-vk-bot:
+    driver: 'bridge'
+  network-pooling:
+    driver: 'bridge'
