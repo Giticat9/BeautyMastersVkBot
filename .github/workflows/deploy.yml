@@ -1,0 +1,18 @@
+name: Deploy To Server
+run-name: ${{github.actor}} is running deploy
+on: [push]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create environment file
+        run: |
+          echo NODE_ENV=${{ vars.NODE_ENV }} > .env
+          echo VK_API_URL=${{ vars.VK_API_URL }} > .env
+          echo VK_API_VERSION=${{ vars.VK_API_VERSION }} > .env
+          echo ${{ vars }}
+        
