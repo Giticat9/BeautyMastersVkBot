@@ -46,6 +46,6 @@ export class VkGroupNewMessageHandlerService {
 
 		const result = await this.vkBotApiService
 			.executeApiPostMethod('messages.send', Object.assign(executeParams, rest ?? {}));
-		console.log(result);
+		console.log(event, result);
 	}
 }
