@@ -10,10 +10,7 @@ services:
     env_file:
       - .env
     networks:
-      - network-vk-bot
-      - network-pooling
+      - main-network
 networks:
-  network-vk-bot:
-    driver: 'bridge'
-  network-pooling:
+  main-network:
     driver: 'bridge'
