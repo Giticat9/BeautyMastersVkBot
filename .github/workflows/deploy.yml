@@ -15,14 +15,14 @@ jobs:
       - name: Create environment file
         run: |
           echo NODE_ENV=${{ vars.NODE_ENV }} > .env
-          echo VK_API_URL=${{ vars.VK_API_URL }} > .env
-          echo VK_API_VERSION=${{ vars.VK_API_VERSION }} > .env
-          echo VK_GROUP_ID=${{ vars.VK_GROUP_ID }} > .env
-          echo VK_GROUP_ACCESS_TOKEN=${{ secrets.VK_GROUP_ACCESS_TOKEN }} > .env
-          echo LINK_SING_UP_DEPILATION=${{ secrets.LINK_SING_UP_DEPILATION }} > .env
-          echo LINK_SING_UP_MANICURE=${{ secrets.LINK_SING_UP_MANICURE }} > .env
-          echo PHONE_DEPILATION_MASTER=${{ secrets.PHONE_DEPILATION_MASTER }} > .env
-          echo PHONE_MANICURE_MASTER=${{ secrets.PHONE_MANICURE_MASTER }} > .env
+          echo VK_API_URL=${{ vars.VK_API_URL }} >> .env
+          echo VK_API_VERSION=${{ vars.VK_API_VERSION }} >> .env
+          echo VK_GROUP_ID=${{ vars.VK_GROUP_ID }} >> .env
+          echo VK_GROUP_ACCESS_TOKEN=${{ secrets.VK_GROUP_ACCESS_TOKEN }} >> .env
+          echo LINK_SING_UP_DEPILATION=${{ secrets.LINK_SING_UP_DEPILATION }} >> .env
+          echo LINK_SING_UP_MANICURE=${{ secrets.LINK_SING_UP_MANICURE }} >> .env
+          echo PHONE_DEPILATION_MASTER=${{ secrets.PHONE_DEPILATION_MASTER }} >> .env
+          echo PHONE_MANICURE_MASTER=${{ secrets.PHONE_MANICURE_MASTER }} >> .env
 
       - name: Build and deploy with Docker Compose
         run: |
