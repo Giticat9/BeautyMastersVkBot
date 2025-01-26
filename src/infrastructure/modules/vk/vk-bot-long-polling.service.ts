@@ -5,6 +5,7 @@ import axios from 'axios';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { EVENT_LISTENER } from './vk-bot-event.decorator';
 import { GetLongPollEventResponse } from '../../interfaces/vk/get-long-poll-event-response.interface';
+import { LongPollingFailedEnum } from './vk-bot-long-polling-failed.enum';
 
 type VkBotEventCallback = (...args: any[]) => void;
 
@@ -81,18 +82,43 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 					},
 				});
 
-				for (const event of response.data?.updates) {
-					const callbacks = this.eventListeners.get(event.type) ?? [];
-					for (const callback of callbacks) {
-						callback(event);
+				if ('failed' in response?.data) {
+					await this.longPollServerErrorHandling(response?.data);
+				} else {
+					for (const event of response.data?.updates ?? []) {
+						const callbacks = this.eventListeners.get(event.type) ?? [];
+						for (const callback of callbacks) {
+							callback(event);
+						}
 					}
-				}
 
-				this.longPollingTs = response.data.ts;
+					this.longPollingTs = response.data.ts;
+				}
 			} catch (error) {
 				console.error('Error in VK Long Polling:', error.message);
 				await new Promise((resolve) => setTimeout(resolve, 5000));
 			}
+		}
+	}
+
+	private async longPollServerErrorHandling(longPollingData: GetLongPollEventResponse) {
+		const { failed, ts } = longPollingData;
+		let message = 'Error received from long poll server.';
+
+		if (failed === LongPollingFailedEnum.HISTORY_EVENTS_OUTDATED_OR_LOST) {
+			message += ` History events outdated or lost. Write new TS value: ${ts}`
+			this.logger.warn(message);
+			this.longPollingTs = ts;
+		} else if (failed === LongPollingFailedEnum.KEY_IS_EXPANDED) {
+			message += ` Key is exceeded. Reinitialization long poll server`;
+			this.logger.warn(message);
+
+			await this.initialLongPollServer();
+		} else if (failed === LongPollingFailedEnum.INFORMATION_LOST) {
+			message += ` Information lost. Reinitialization long poll server`;
+			this.logger.warn(message);
+
+			await this.initialLongPollServer();
 		}
 	}
 }

@@ -1,8 +1,10 @@
 import { VkGroupEvents } from '../../modules/vk/vk-bot-events.enum';
 import { VkGroupChatActionButtonType } from '../../../domain/enums/action-button-types.enum';
+import { LongPollingFailedEnum } from '../../modules/vk/vk-bot-long-polling-failed.enum';
 
 export interface GetLongPollEventResponse {
 	ts: string;
+	failed?: LongPollingFailedEnum;
 	updates: GetLongPollEventUpdate[];
 }
 

@@ -1,0 +1,5 @@
+export enum LongPollingFailedEnum {
+	HISTORY_EVENTS_OUTDATED_OR_LOST = 1,
+	KEY_IS_EXPANDED = 2,
+	INFORMATION_LOST = 3
+}
