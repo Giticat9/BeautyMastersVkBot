@@ -60,16 +60,26 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 		});
 	}
 
-	private async initialLongPollServer(): Promise<string> {
-		const longPollServer = await this.vkBotApiService.getLongPollServer();
-		this.longPollingKey = longPollServer.key;
-		this.longPollingTs = longPollServer.ts;
+	private async initialLongPollServer(retryCount = 0, maxRetryCount = 5): Promise<string> {
+		try {
+			const longPollServer = await this.vkBotApiService.getLongPollServer();
+			this.logger.log('Initialization long poll server is successfully');
 
-		return longPollServer.server;
+			this.longPollingKey = longPollServer.key;
+			this.longPollingTs = longPollServer.ts;
+
+			return longPollServer.server;
+		} catch (error) {
+			this.logger.error(`Initialization long poll server is failed: ${error.message}`);
+			if (retryCount <= maxRetryCount) {
+				this.logger.warn('Retrying initialization long poll server');
+				await this.initialLongPollServer(retryCount + 1, maxRetryCount);
+			}
+		}
 	}
 
 	private async listenForEvents(longPollServerUrl: string): Promise<void> {
-		this.logger.log('VK Long Polling started...');
+		this.logger.log('VK Long Polling started');
 
 		while (true) {
 			try {
@@ -106,7 +116,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 		let message = 'Error received from long poll server.';
 
 		if (failed === LongPollingFailedEnum.HISTORY_EVENTS_OUTDATED_OR_LOST) {
-			message += ` History events outdated or lost. Write new TS value: ${ts}`
+			message += ` History events outdated or lost. Write new TS value: ${ts}`;
 			this.logger.warn(message);
 			this.longPollingTs = ts;
 		} else if (failed === LongPollingFailedEnum.KEY_IS_EXPANDED) {
