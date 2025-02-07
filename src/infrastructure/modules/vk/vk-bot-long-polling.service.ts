@@ -7,11 +7,12 @@ import { EVENT_LISTENER } from './vk-bot-event.decorator';
 import { GetLongPollEventResponse } from '../../interfaces/vk/get-long-poll-event-response.interface';
 import { LongPollingFailedEnum } from './vk-bot-long-polling-failed.enum';
 
-type VkBotEventCallback = (...args: any[]) => void;
+type VkBotEventCallback = (...args: any[]) => Promise<void>;
 
 @Injectable()
 export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutdown {
 	private readonly logger = new Logger(VkBotLongPollingService.name);
+	private isRunning: boolean = true;
 	private longPollingKey: string;
 	private longPollingTs: string;
 	private eventListeners: Map<string, VkBotEventCallback[]> = new Map();
@@ -30,6 +31,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 	}
 
 	onApplicationShutdown() {
+		this.isRunning = false;
 		this.eventListeners.clear();
 	}
 
@@ -65,6 +67,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 			const longPollServer = await this.vkBotApiService.getLongPollServer();
 			this.logger.log('Initialization long poll server is successfully');
 
+			console.log(longPollServer);
 			this.longPollingKey = longPollServer.key;
 			this.longPollingTs = longPollServer.ts;
 
@@ -81,7 +84,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 	private async listenForEvents(longPollServerUrl: string): Promise<void> {
 		this.logger.log('VK Long Polling started');
 
-		while (true) {
+		while (this.isRunning) {
 			try {
 				const response = await axios.get<GetLongPollEventResponse>(longPollServerUrl, {
 					params: {
@@ -98,7 +101,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 					for (const event of response.data?.updates ?? []) {
 						const callbacks = this.eventListeners.get(event.type) ?? [];
 						for (const callback of callbacks) {
-							callback(event);
+							await callback(event);
 						}
 					}
 

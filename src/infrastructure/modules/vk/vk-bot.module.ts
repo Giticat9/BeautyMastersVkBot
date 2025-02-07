@@ -7,11 +7,14 @@ import {
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
 import { EventProcessingService } from '../../../domain/services/event-processing.service';
 import { EventNewMessagePayloadService } from '../../../domain/services/payloads/event-new-message-payload.service';
+import { RateLimiterService } from '../../../application/services/rate-limiter.service';
 
 @Module({
 	providers: [
 		DiscoveryService,
 		MetadataScanner,
+
+		RateLimiterService,
 
 		VkBotApiService,
 		VkBotLongPollingService,

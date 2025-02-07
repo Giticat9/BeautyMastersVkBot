@@ -25,7 +25,9 @@ export class VkBotApiService {
 				access_token: this.vkGroupAccessToken,
 				v: this.vkApiVersion,
 			},
-			transformResponse: (data) => JSON.parse(data)?.response,
+			transformResponse: (data) => {
+				return JSON.parse(data)?.response;
+			},
 		});
 
 		return response.data;

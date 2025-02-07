@@ -7,23 +7,41 @@ import {
 import { EventProcessingService } from '../../../../domain/services/event-processing.service';
 import { VkBotApiService } from '../../../../infrastructure/modules/vk/vk-bot-api.service';
 import { EventProcessingReturnType } from '../../../../domain/interfaces/event-processing.interface';
+import { delay } from '../../../../domain/utils/delay.utils';
+import { RateLimiterService } from '../../rate-limiter.service';
+import { Generator } from '../../../../domain/utils/generator.utils';
 
 @Injectable()
 export class VkGroupNewMessageHandlerService {
 	private readonly logger = new Logger(VkGroupNewMessageHandlerService.name);
 
 	constructor(private readonly eventProcessingService: EventProcessingService,
-				private readonly vkBotApiService: VkBotApiService) {
+				private readonly vkBotApiService: VkBotApiService,
+				private readonly rateLimiterService: RateLimiterService) {
 	}
 
 	@VKBotEvent(VkGroupEvents.MESSAGE_NEW)
 	async handleVkGroupNewMessage(event: GetLongPollEventUpdate) {
 		try {
+			const peerId = event.object.message.peer_id;
+			if (!this.rateLimiterService.canProcess(peerId)) {
+				this.logger.warn(
+					`Слишком много запросов от пользователя ${peerId}. Событие игнорируется.`,
+				);
+				return;
+			}
+
+			const randomId = event.object.message.random_id;
+			if (!randomId) {
+				return;
+			}
+
 			const payloads = this.eventProcessingService.processNewMessageEvent(event);
 			if (Array.isArray(payloads) && payloads.length > 0) {
 				for (let i = 0; i < payloads.length; i++) {
 					const payload = payloads[i];
 					await this.processSendMessage(event, payload);
+					await delay(500);
 				}
 			} else if (typeof payloads === 'object' && !Array.isArray(payloads) && payloads !== null) {
 				await this.processSendMessage(event, payloads);
@@ -38,7 +56,7 @@ export class VkGroupNewMessageHandlerService {
 
 		const executeParams: Record<string, any> = {
 			peer_id: event.object.message.peer_id,
-			random_id: 0,
+			random_id: Generator.generateRandomId(),
 		};
 
 		if (keyboard) executeParams['keyboard'] = JSON.stringify(keyboard);
