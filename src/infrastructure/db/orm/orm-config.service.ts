@@ -4,7 +4,7 @@ import { snakeCase } from 'typeorm/util/StringUtils';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 
-class SnakeCaseNamingStrategy extends DefaultNamingStrategy {
+export class SnakeCaseNamingStrategy extends DefaultNamingStrategy {
 	columnName(propertyName: string, customName: string, embeddedPrefixes: string[]): string {
 		const name = customName ?? propertyName;
 		if (embeddedPrefixes.length) {
@@ -15,8 +15,8 @@ class SnakeCaseNamingStrategy extends DefaultNamingStrategy {
 }
 
 const typeormCommonOptions: Partial<TypeOrmModuleOptions> = {
-	entities: ['dist/infrastructure/orm/entities/**/*.entity.js'],
-	migrations: ['dist/infrastructure/orm/migrations/**/*.migration.js'],
+	entities: ['dist/infrastructure/db/orm/entities/**/*.entity.js'],
+	migrations: ['dist/infrastructure/db/orm/migrations/**/*.migration.js'],
 	migrationsTransactionMode: 'all',
 	logging: true,
 	manualInitialization: true,

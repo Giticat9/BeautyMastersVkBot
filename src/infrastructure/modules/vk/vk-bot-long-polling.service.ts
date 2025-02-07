@@ -67,7 +67,6 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 			const longPollServer = await this.vkBotApiService.getLongPollServer();
 			this.logger.log('Initialization long poll server is successfully');
 
-			console.log(longPollServer);
 			this.longPollingKey = longPollServer.key;
 			this.longPollingTs = longPollServer.ts;
 

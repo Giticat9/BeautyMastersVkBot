@@ -4,7 +4,7 @@ import { camelToSnakeCase } from './snake-case.utils';
 export class Serializer {
 	static serialize<T>(instance: T): any {
 		if (Array.isArray(instance)) {
-			return instance.map(item => this.serialize(item)); // Рекурсивная обработка массива
+			return instance.map(item => this.serialize(item));
 		}
 
 		if (typeof instance === 'object' && instance !== null) {
