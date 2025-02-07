@@ -12,7 +12,7 @@ type VkBotEventCallback = (...args: any[]) => Promise<void>;
 @Injectable()
 export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutdown {
 	private readonly logger = new Logger(VkBotLongPollingService.name);
-	private isRunning: boolean = true;
+	private isRunning: boolean = false;
 	private longPollingKey: string;
 	private longPollingTs: string;
 	private eventListeners: Map<string, VkBotEventCallback[]> = new Map();
@@ -46,8 +46,8 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 		const allProviders = this.discoveryService.getProviders();
 
 		allProviders.forEach(({ instance }) => {
-			if (instance) {
-				const methodNames = this.metadataScanner.getAllMethodNames(instance);
+			if (instance && typeof instance === 'object') {
+				const methodNames = this.metadataScanner?.getAllMethodNames(instance);
 				for (const methodName of methodNames) {
 					const event = this.reflector.get(EVENT_LISTENER, instance[methodName]);
 
