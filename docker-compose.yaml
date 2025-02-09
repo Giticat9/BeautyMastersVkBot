@@ -15,17 +15,19 @@ services:
       - main-network
     command: [ "sh", "-c", "until nc -z postgres 5432; do sleep 1; done && npm run migration:run && node dist/main.js" ]
   postgres:
-    image: postgres:15
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     container_name: BeautyMastersPostgres
+    entrypoint: ["sh", "-c", "envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"]
     env_file:
       - .env
-    entrypoint: [ "/bin/sh", "-c", "apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres" ]
     restart: always
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${DB_USERNAME}" ]
-      interval: 10s
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}" ]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
