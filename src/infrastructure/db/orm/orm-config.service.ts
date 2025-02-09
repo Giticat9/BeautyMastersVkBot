@@ -18,7 +18,7 @@ const typeormCommonOptions: Partial<TypeOrmModuleOptions> = {
 	entities: ['dist/infrastructure/db/orm/entities/**/*.entity.js'],
 	migrations: ['dist/infrastructure/db/orm/migrations/**/*.migration.js'],
 	migrationsTransactionMode: 'all',
-	logging: true,
+	logging: false,
 	manualInitialization: true,
 	synchronize: false,
 	migrationsRun: false,
@@ -27,8 +27,7 @@ const typeormCommonOptions: Partial<TypeOrmModuleOptions> = {
 
 @Injectable()
 export class TypeormConfigService implements TypeOrmOptionsFactory {
-	constructor(private readonly configService: ConfigService) {
-	}
+	constructor(private readonly configService: ConfigService) {}
 
 	createTypeOrmOptions(): TypeOrmModuleOptions {
 		const dbType = this.configService.get<string>('DB_KIND') ?? 'postgres';

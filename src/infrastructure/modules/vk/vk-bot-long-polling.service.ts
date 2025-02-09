@@ -6,22 +6,30 @@ import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { EVENT_LISTENER } from './vk-bot-event.decorator';
 import { GetLongPollEventResponse } from '../../interfaces/vk/get-long-poll-event-response.interface';
 import { LongPollingFailedEnum } from './vk-bot-long-polling-failed.enum';
+import { SetLastTsValueUseCase } from '../../../application/use-cases/app-settings/set-last-ts-value.use-case';
+import { GetLastTsValueUseCase } from '../../../application/use-cases/app-settings/get-last-ts-value.use-case';
+import { delay } from '../../../domain/utils/delay.utils';
+import { ShutdownService } from '../../../shutdown.service';
 
 type VkBotEventCallback = (...args: any[]) => Promise<void>;
 
 @Injectable()
 export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutdown {
 	private readonly logger = new Logger(VkBotLongPollingService.name);
-	private isRunning: boolean = false;
+	private isRunning: boolean = true;
 	private longPollingKey: string;
 	private longPollingTs: string;
 	private eventListeners: Map<string, VkBotEventCallback[]> = new Map();
 
-	constructor(private readonly discoveryService: DiscoveryService,
-				private readonly reflector: Reflector,
-				private readonly metadataScanner: MetadataScanner,
-				private readonly vkBotApiService: VkBotApiService) {
-	}
+	constructor(
+		private readonly shutdownService: ShutdownService,
+		private readonly discoveryService: DiscoveryService,
+		private readonly reflector: Reflector,
+		private readonly metadataScanner: MetadataScanner,
+		private readonly vkBotApiService: VkBotApiService,
+		private readonly getLastTsValueUseCase: GetLastTsValueUseCase,
+		private readonly setLastTsValueUseCase: SetLastTsValueUseCase,
+	) {}
 
 	async onModuleInit() {
 		this.initializeEventListeners();
@@ -54,7 +62,9 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 					if (event) {
 						const callback = instance[methodName];
 
-						this.logger.log(`Subscribing vk bot event listener. { event_name: ${event}, callback: ${methodName} }`);
+						this.logger.log(
+							`Subscribing vk bot event listener. { event_name: ${event}, callback: ${methodName} }`,
+						);
 						this.subscribe(event, callback.bind(instance));
 					}
 				}
@@ -62,20 +72,24 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 		});
 	}
 
-	private async initialLongPollServer(retryCount = 0, maxRetryCount = 5): Promise<string> {
+	private async initialLongPollServer(retryCount = 0, maxRetryCount = 1): Promise<string> {
 		try {
 			const longPollServer = await this.vkBotApiService.getLongPollServer();
-			this.logger.log('Initialization long poll server is successfully');
 
 			this.longPollingKey = longPollServer.key;
 			this.longPollingTs = longPollServer.ts;
+			await this.setLastTsValueUseCase.execute(longPollServer.ts);
 
+			this.logger.log('Initialization long poll server is successfully');
 			return longPollServer.server;
 		} catch (error) {
 			this.logger.error(`Initialization long poll server is failed: ${error.message}`);
 			if (retryCount <= maxRetryCount) {
-				this.logger.warn('Retrying initialization long poll server');
+				this.logger.warn('Retrying initialization long poll server after 5s');
+				await delay(5000);
 				await this.initialLongPollServer(retryCount + 1, maxRetryCount);
+			} else {
+				this.shutdownService.shutdown();
 			}
 		}
 	}
@@ -85,11 +99,12 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 
 		while (this.isRunning) {
 			try {
+				const currentTs = await this.getLastTsValueUseCase.execute();
 				const response = await axios.get<GetLongPollEventResponse>(longPollServerUrl, {
 					params: {
 						act: 'a_check',
 						key: this.longPollingKey,
-						ts: this.longPollingTs,
+						ts: currentTs,
 						wait: 25,
 					},
 				});
@@ -105,10 +120,11 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 					}
 
 					this.longPollingTs = response.data.ts;
+					await this.setLastTsValueUseCase.execute(response.data.ts);
 				}
 			} catch (error) {
 				console.error('Error in VK Long Polling:', error.message);
-				await new Promise((resolve) => setTimeout(resolve, 5000));
+				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 		}
 	}
@@ -121,6 +137,7 @@ export class VkBotLongPollingService implements OnModuleInit, OnApplicationShutd
 			message += ` History events outdated or lost. Write new TS value: ${ts}`;
 			this.logger.warn(message);
 			this.longPollingTs = ts;
+			await this.setLastTsValueUseCase.execute(ts);
 		} else if (failed === LongPollingFailedEnum.KEY_IS_EXPANDED) {
 			message += ` Key is exceeded. Reinitialization long poll server`;
 			this.logger.warn(message);
