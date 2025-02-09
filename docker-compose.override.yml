@@ -1,3 +1,0 @@
-services:
-  postgres:
-    entrypoint: /bin/sh -c "echo 'Running custom entrypoint'; apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"

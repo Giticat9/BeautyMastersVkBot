@@ -4,7 +4,7 @@ services:
     container_name: BeautyMastersPostgres
     env_file:
       - .env
-    entrypoint: /bin/sh -c "apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"
+    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"]
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -34,5 +34,6 @@ services:
     command: [ "sh", "-c", "npm run migration:run && node dist/main.js" ]
 networks:
   main-network:
+    driver: 'bridge'
 volumes:
   postgres_data:
