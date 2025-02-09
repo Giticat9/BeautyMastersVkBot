@@ -10,7 +10,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - main-network
     command: [ "sh", "-c", "npm run migration:run && node dist/main.js" ]
@@ -21,12 +21,17 @@ services:
       - .env
     entrypoint: [ "/bin/sh", "-c", "apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres" ]
     restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${DB_USERNAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5434:5432"
     networks:
       - main-network
     volumes:
