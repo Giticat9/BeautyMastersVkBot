@@ -15,6 +15,12 @@ jobs:
       - name: Create environment file
         run: |
           echo NODE_ENV=${{ vars.NODE_ENV }} > .env
+          echo DB_HOST=${{ vars.DB_HOST }} >> .env
+          echo DB_PORT=${{ vars.DB_PORT }} >> .env
+          echo DB_NAME=${{ vars.DB_NAME }} >> .env
+          echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+          echo DB_KIND=${{ vars.DB_KIND }} >> .env
           echo VK_API_URL=${{ vars.VK_API_URL }} >> .env
           echo VK_API_VERSION=${{ vars.VK_API_VERSION }} >> .env
           echo VK_GROUP_ID=${{ vars.VK_GROUP_ID }} >> .env
@@ -31,9 +37,9 @@ jobs:
 
           cat .env
           
-          docker compose down  # Останавливаем старые контейнеры, если есть
-          docker compose build # Собираем образы из Dockerfile
-          docker compose up -d # Запускаем контейнеры в фоновом режиме
+          docker compose down
+          docker compose build
+          docker compose up -d
 
       - name: Verify running containers
         run: |
