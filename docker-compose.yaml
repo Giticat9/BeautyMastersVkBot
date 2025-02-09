@@ -10,21 +10,27 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
+    networks:
+      - main-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: BeautyMastersVkBotApp
+    env_file:
+      - .env
     restart: always
     depends_on:
       - postgres
     ports:
-      - "3001:3000"
+      - "3000:3000"
+    networks:
+      - main-network
     command: [ "sh", "-c", "npm run migration:run && node dist/main.js" ]
-
+networks:
+  main-network:
 volumes:
   postgres_data:
