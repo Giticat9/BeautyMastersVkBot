@@ -1,3 +1,0 @@
-Acquire::http::Timeout "10";
-Acquire::ftp::Timeout "10";
-Acquire::https::Timeout "10";

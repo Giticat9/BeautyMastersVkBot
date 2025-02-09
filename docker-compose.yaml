@@ -10,24 +10,16 @@ services:
     depends_on:
       - postgres
     ports:
-      - "3001:3000"
+      - "3000:3000"
     networks:
       - main-network
-    command: [ "sh", "-c", "until nc -z postgres 5432; do sleep 1; done && npm run migration:run && node dist/main.js" ]
+    command: [ "sh", "-c", "npm run migration:run && node dist/main.js" ]
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres
+    image: postgres:15
     container_name: BeautyMastersPostgres
-    entrypoint: ["sh", "-c", "envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"]
     env_file:
       - .env
     restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
@@ -38,7 +30,6 @@ services:
       - main-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
 networks:
   main-network:
     driver: 'bridge'
