@@ -1,9 +1,2 @@
 FROM postgres:15
-
-RUN echo "deb http://mirror.yandex.ru/debian bookworm main contrib non-free" > /etc/apt/sources.list && \
-    echo "deb http://mirror.yandex.ru/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://mirror.yandex.ru/postgresql/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext-base && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=alpine:latest /usr/bin/envsubst /usr/bin/envsubst
