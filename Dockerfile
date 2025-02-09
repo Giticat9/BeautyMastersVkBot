@@ -2,7 +2,7 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm i
 
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY src/ ./src
