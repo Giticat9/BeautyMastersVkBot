@@ -1,4 +1,9 @@
 FROM postgres:15
 
-RUN apt-get update && apt-get install -y gettext-base && \
+COPY 99timeout /etc/apt/apt.conf.d/99timeout
+
+RUN sed -i 's|http://deb.debian.org|http://mirror.yandex.ru|g' /etc/apt/sources.list && \
+    sed -i 's|http://apt.postgresql.org|http://mirror.yandex.ru/postgresql|g' /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gettext-base && \
     rm -rf /var/lib/apt/lists/*
