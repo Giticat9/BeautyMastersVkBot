@@ -1,0 +1,3 @@
+services:
+  postgres:
+    entrypoint: /bin/sh -c "envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"
