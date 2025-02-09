@@ -19,7 +19,7 @@ services:
     container_name: BeautyMastersPostgres
     env_file:
       - .env
-    entrypoint: [ "/bin/sh", "-c", "apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres" ]
+    entrypoint: [ "/bin/sh", "-c", "apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres" ]
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "${DB_USERNAME}" ]
