@@ -1,15 +1,29 @@
 services:
-  vk_bot_app:
-    restart: 'always'
+  postgres:
+    image: postgres:15
+    container_name: BeautyMastersPostgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+  app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: BeautyMastersVkBotApp
+    restart: always
+    depends_on:
+      - postgres
     ports:
-      - '3000:3000'
-    env_file:
-      - .env
-    networks:
-      - main-network
-networks:
-  main-network:
-    driver: 'bridge'
+      - "3000:3000"
+    command: [ "sh", "-c", "npm run migration:run && node dist/main.js" ]
+
+volumes:
+  postgres_data:
