@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:15
     container_name: BeautyMastersPostgres
+    entrypoint: /bin/sh -c "apt-get update && apt-get install -y gettext-base && envsubst < /docker-entrypoint-initdb.d/init-db.sql.template > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
