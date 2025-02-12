@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Serializer } from '../../utils/serializer.utils';
-import { VkGroupChatOpenLinkButtonDto, VkGroupChatTextButtonDto, VkGroupMessageDto } from '../../dto';
+import {
+	VkGroupChatOpenLinkButtonDto,
+	VkGroupChatTextButtonDto,
+	VkGroupMessageDto,
+} from '../../dto';
 import { VkGroupChatActionButtonType } from '../../enums/action-button-types.enum';
 import { VkGroupChatButtonColorEnum } from '../../enums/chat-button-color.enum';
 
@@ -30,10 +34,9 @@ export class EventNewMessagePayloadService {
 				),
 			],
 			[
-				new VkGroupChatTextButtonDto(
-					'Рассказать о нас',
-					{ command: VkGroupChatActionButtonType.ABOUT_US },
-				),
+				new VkGroupChatTextButtonDto('Рассказать о нас', {
+					command: VkGroupChatActionButtonType.ABOUT_US,
+				}),
 				new VkGroupChatOpenLinkButtonDto(
 					'https://yandex.ru/maps/org/a2_mastera_byuti/38639739508/?ll=38.220216%2C55.716697&z=17',
 					'Местоположение',
@@ -63,10 +66,9 @@ export class EventNewMessagePayloadService {
 				),
 			],
 			[
-				new VkGroupChatTextButtonDto(
-					'Назад',
-					{ command: VkGroupChatActionButtonType.BACK_FROM_MASTERS_LIST },
-				),
+				new VkGroupChatTextButtonDto('Назад', {
+					command: VkGroupChatActionButtonType.BACK_FROM_MASTERS_LIST,
+				}),
 			],
 		];
 
@@ -82,9 +84,7 @@ export class EventNewMessagePayloadService {
 				new VkGroupChatOpenLinkButtonDto(`https://wa.me/${phoneNumber}`, 'WhatsApp'),
 				new VkGroupChatOpenLinkButtonDto(`https://t.me/+${phoneNumber}`, 'Telegram'),
 			],
-			[
-				new VkGroupChatOpenLinkButtonDto(`tel:+${phoneNumber}`, 'Позвонить'),
-			],
+			[new VkGroupChatOpenLinkButtonDto(`tel:+${phoneNumber}`, 'Позвонить')],
 		];
 
 		return Serializer.serialize(messageDto);
@@ -116,10 +116,9 @@ export class EventNewMessagePayloadService {
 				),
 			],
 			[
-				new VkGroupChatTextButtonDto(
-					'Назад',
-					{ command: VkGroupChatActionButtonType.BACK_FROM_PRICE_LIST },
-				),
+				new VkGroupChatTextButtonDto('Назад', {
+					command: VkGroupChatActionButtonType.BACK_FROM_PRICE_LIST,
+				}),
 			],
 		];
 
@@ -131,16 +130,12 @@ export class EventNewMessagePayloadService {
 		messageDto.oneTime = false;
 		messageDto.inline = true;
 		messageDto.buttons = [
-			[
-				new VkGroupChatOpenLinkButtonDto(link, 'Записаться'),
-			],
+			[new VkGroupChatOpenLinkButtonDto(link, 'Записаться')],
 			[
 				new VkGroupChatOpenLinkButtonDto(`https://wa.me/${phoneNumber}`, 'WhatsApp'),
 				new VkGroupChatOpenLinkButtonDto(`https://t.me/+${phoneNumber}`, 'Telegram'),
 			],
-			[
-				new VkGroupChatOpenLinkButtonDto(`tel:+${phoneNumber}`, 'Позвонить'),
-			],
+			[new VkGroupChatOpenLinkButtonDto(`tel:+${phoneNumber}`, 'Позвонить')],
 		];
 
 		return Serializer.serialize(messageDto);
@@ -151,12 +146,8 @@ export class EventNewMessagePayloadService {
 		messageDto.oneTime = false;
 		messageDto.inline = true;
 		messageDto.buttons = [
-			[
-				new VkGroupChatOpenLinkButtonDto(manicureLink, 'Маникюр/педикюр'),
-			],
-			[
-				new VkGroupChatOpenLinkButtonDto(depilationLink, 'Депиляция/SPA-шугаринг'),
-			],
+			[new VkGroupChatOpenLinkButtonDto(manicureLink, 'Маникюр/педикюр')],
+			[new VkGroupChatOpenLinkButtonDto(depilationLink, 'Депиляция/SPA-шугаринг')],
 		];
 	}
 
@@ -209,43 +200,52 @@ export class EventNewMessagePayloadService {
 		return (
 			'💎  Лицо (1 зона)\n' +
 			'  ➖ Цена: от 250 ₽\n' +
-			'  ➖ Время: 30 минут\n\n' +
+			'  ➖ Время: 15 минут\n\n' +
 			'💎  Спина\n' +
 			'  ➖ Цена: от 600 ₽\n' +
 			'  ➖ Время: 50 минут\n\n' +
 			'💎  Бикини классическое\n' +
 			'  ➖ Цена: от 800 ₽\n' +
 			'  ➖ Время: 40 минут\n\n' +
+			'💎  Веки под бровками\n' +
+			'  ➖ Цена: от 300 ₽\n' +
+			'  ➖ Время: 15 минут\n\n' +
 			'💎  Бикини глубокое\n' +
 			'  ➖ Цена: от 1 200 ₽\n' +
 			'  ➖ Время: 1 час\n\n' +
-			'💎  Ножки до колена\n' +
-			'  ➖ Цена: от 700 ₽\n' +
-			'  ➖ Время: 40 минут\n\n' +
+			'💎  Живот\n' +
+			'  ➖ Цена: от 300 ₽\n' +
+			'  ➖ Время: 20 минут\n\n' +
+			'💎  Ноги до колена\n' +
+			'  ➖ Цена: от 600 ₽\n' +
+			'  ➖ Время: 30 минут\n\n' +
+			'💎  Ноги выше колена\n' +
+			'  ➖ Цена: от 600 ₽\n' +
+			'  ➖ Время: 30 минут\n\n' +
+			'💎  Ноги полностью\n' +
+			'  ➖ Цена: от 1 150 ₽\n' +
+			'  ➖ Время: 1 час 20 минут\n\n' +
 			'💎  Подмышки\n' +
 			'  ➖ Цена: от 350 ₽\n' +
-			'  ➖ Время: 30 минут\n\n' +
-			'💎  Бёдра\n' +
+			'  ➖ Время: 20 минут\n\n' +
+			'💎  Руки выше локтя\n' +
 			'  ➖ Цена: от 600 ₽\n' +
-			'  ➖ Время: 45 минут\n\n' +
-			'💎  Животик\n' +
-			'  ➖ Цена: от 450 ₽\n' +
 			'  ➖ Время: 30 минут\n\n' +
-			'💎  Мужская, спина\n' +
-			'  ➖ Цена: от 1 000 ₽\n' +
-			'  ➖ Время: 30 минут\n\n' +
-			'💎  Ножки полностью\n' +
-			'  ➖ Цена: от 1 100 ₽\n' +
-			'  ➖ Время: 1 час 20 минут\n\n' +
 			'💎  Руки до локтя\n' +
 			'  ➖ Цена: от 600 ₽\n' +
 			'  ➖ Время: 30 минут\n\n' +
 			'💎  Руки полностью\n' +
-			'  ➖ Цена: от 800 ₽\n' +
+			'  ➖ Цена: от 1 100 ₽\n' +
+			'  ➖ Время: 50 минут\n\n' +
+			'💎  Спина мужская\n' +
+			'  ➖ Цена: от 1 000 ₽\n' +
 			'  ➖ Время: 40 минут\n\n' +
-			'💎  Ягодицы\n' +
-			'  ➖ Цена: от 400 ₽\n' +
+			'💎  Шея, вески\n' +
+			'  ➖ Цена: от 450 ₽\n' +
 			'  ➖ Время: 30 минут\n\n' +
+			'💎  Бёдра\n' +
+			'  ➖ Цена: от 600 ₽\n' +
+			'  ➖ Время: 45 минут\n\n' +
 			'💎 Комплекс: Подмышки + Глубокое бикини + Ноги полностью\n' +
 			'  ➖ Цена: от 2 600 ₽\n' +
 			'  ➖ Время: 3 часа\n'
